@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Batalla Naval - Prototipo Avanzado</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    :root {
+      --agua: #5bc0eb;
+      --agua-onda: #45a6d9;
+      --barco: #595959;
+      --tocado: #e63946;
+      --hundido: #343a40;
+      --fondo: #eaf6fb;
+      --misil1: #f9c74f;
+      --misil2: #f94144;
+      --misil3: #90be6d;
+    }
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      margin: 0;
+      background: var(--fondo);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    h1 {
+      margin: 10px 0 0 0;
+      font-size: 2.2em;
+      color: #1976d2;
+      letter-spacing: 2px;
+    }
+    .instrucciones {
+      background: #fff;
+      border-radius: 12px;
+      padding: 16px 28px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+      margin: 18px 0 10px 0;
+      max-width: 600px;
+      font-size: 1.01em;
+      text-align: left;
+    }
+    .tableros {
+      display: flex;
+      justify-content: center;
+      gap: 32px;
+      flex-wrap: wrap;
+      width: 100%;
+      margin: 12px 0 0 0;
+    }
+    .tablero-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .nombre-jugador {
+      font-weight: bold;
+      margin-bottom: 6px;
+      color: #1976d2;
+      font-size: 1.15em;
+      letter-spacing: 1px;
+    }
+    .tablero {
+      display: grid;
+      grid-template-columns: repeat(12, minmax(18px, 2.8vw));
+      grid-template-rows: repeat(12, minmax(18px, 2.8vw));
+      background: linear-gradient(135deg, var(--agua), var(--agua-onda));
+      border: 3px solid #1976d2;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(25,118,210,0.07);
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 5px;
+      min-width: 220px;
+      min-height: 220px;
+      max-width: 98vw;
+      max-height: 55vw;
+      aspect-ratio: 1/1;
+    }
+    .celda {
+      width: 100%;
+      height: 100%;
+      min-width: 18px;
+      min-height: 18px;
+      user-select: none;
+      border: 1px solid #e3f0fb;
+      background: rgba(255,255,255,0.08);
+      transition: background 0.28s, box-shadow 0.14s;
+      box-sizing: border-box;
+    }
+    .celda.agua {
+      background: linear-gradient(135deg, var(--agua), var(--agua-onda));
+      animation: ondaAgua 1.5s infinite alternate;
+    }
+    .celda.tocado {
+      background: var(--tocado);
+    }
+    .celda.hundido {
+      background: var(--hundido);
+    }
+    .celda.barco {
+      background: var(--barco);
+    }
+    .anim-misil1 {
+      box-shadow: 0 0 12px 4px var(--misil1);
+      animation: misil1 0.7s;
+    }
+    .anim-misil2 {
+      box-shadow: 0 0 15px 6px var(--misil2);
+      animation: misil2 0.9s;
+    }
+    .anim-misil3 {
+      box-shadow: 0 0 16px 7px var(--misil3);
+      animation: misil3 1.1s;
+    }
+    @keyframes ondaAgua {
+      0% { filter: brightness(0.95); }
+      100% { filter: brightness(1.13); }
+    }
+    @keyframes misil1 {
+      0% { box-shadow: 0 0 12px 8px var(--misil1);}
+      100% { box-shadow: none;}
+    }
+    @keyframes misil2 {
+      0% { box-shadow: 0 0 20px 8px var(--misil2);}
+      100% { box-shadow: none;}
+    }
+    @keyframes misil3 {
+      0% { box-shadow: 0 0 24px 10px var(--misil3);}
+      100% { box-shadow: none;}
+    }
+    .nombres-barcos {
+      margin: 9px 0 0 0;
+      font-size: 0.97em;
+      color: #333;
+      min-height: 1.5em;
+    }
+    .botones-misiles {
+      margin: 13px 0 0 0;
+      display: flex;
+      gap: 14px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .boton-misil {
+      cursor: pointer;
+      border: none;
+      outline: none;
+      padding: 7px 19px;
+      border-radius: 6px;
+      font-size: 1em;
+      font-weight: bold;
+      color: #fff;
+      background: #1976d2;
+      transition: background 0.2s;
+      box-shadow: 0 1px 6px rgba(25,118,210,0.1);
+    }
+    .boton-misil.m1 { background: var(--misil1);}
+    .boton-misil.m2 { background: var(--misil2);}
+    .boton-misil.m3 { background: var(--misil3);}
+    .boton-misil:active { filter: brightness(0.95);}
+    .reiniciar-btn {
+      margin: 18px 0 0 0;
+      padding: 9px 30px;
+      background: #1976d2;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.07em;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.17s;
+      box-shadow: 0 1px 7px rgba(25,118,210,0.14);
+    }
+    .reiniciar-btn:hover {
+      background: #145ea8;
+    }
+    @media (max-width: 800px) {
+      .tableros { flex-direction: column; align-items: center;}
+      .tablero { max-width: 97vw; max-height: 75vw; }
+    }
+    @media (max-width: 500px) {
+      .instrucciones { font-size: 0.97em; padding: 7px 4vw;}
+      .tablero { min-width: 160px; min-height: 160px;}
+    }
+  </style>
+</head>
+<body>
+  <h1>Batalla Naval - Prototipo Avanzado</h1>
+  <div class="instrucciones">
+    <b>Instrucciones:</b> 
+    <ul>
+      <li>Coloca tus 12 barcos en el tablero: Portaviones, Submarino Nuclear, Destructor, Fragata, Crucero, Corbeta, Buque de Asalto, Lancha Torpedera, Barco de Suministros, Submarino Ligero, Buque Hospital, y Barco Radar.</li>
+      <li>Cada barco tiene diferente tamaño y nombre. Elige el tipo de misil para atacar el tablero enemigo. ¡Cada misil tiene efectos únicos!</li>
+      <li>¡Derrota a la IA avanzada! El primer jugador en hundir todos los barcos enemigos gana.</li>
+      <li>Haz clic en una celda para atacar. Usa el botón “Reiniciar Juego” para empezar de nuevo.</li>
+      <li>¡Disfruta de sonidos, animaciones y un mar dinámico!</li>
+    </ul>
+  </div>
+  <div class="tableros">
+    <div class="tablero-container">
+      <div class="nombre-jugador">Jugador</div>
+      <div id="tablero-jugador" class="tablero"></div>
+      <div class="nombres-barcos" id="barcos-jugador"></div>
+    </div>
+    <div class="tablero-container">
+      <div class="nombre-jugador">IA</div>
+      <div id="tablero-ia" class="tablero"></div>
+      <div class="nombres-barcos" id="barcos-ia"></div>
+    </div>
+  </div>
+  <div class="botones-misiles">
+    <button class="boton-misil m1" id="misil1">Misil Normal</button>
+    <button class="boton-misil m2" id="misil2">Misil Explosivo</button>
+    <button class="boton-misil m3" id="misil3">Misil Inteligente</button>
+  </div>
+  <button class="reiniciar-btn" id="reiniciar">Reiniciar Juego</button>
+  <audio id="snd-agua" src="https://cdn.pixabay.com/audio/2022/03/15/audio_115b9c3e7b.mp3"></audio>
+  <audio id="snd-tocado" src="https://cdn.pixabay.com/audio/2022/03/15/audio_118b7e7f04.mp3"></audio>
+  <audio id="snd-hundido" src="https://cdn.pixabay.com/audio/2022/03/15/audio_11c4a3b3c2.mp3"></audio>
+  <audio id="snd-misil" src="https://cdn.pixabay.com/audio/2022/03/15/audio_11c85c3e7d.mp3"></audio>
+  <script>
+    // --- Configuración de barcos ---
+    const BARCOS = [
+      { nombre: "Portaviones", tamaño: 5 },
+      { nombre: "Submarino Nuclear", tamaño: 4 },
+      { nombre: "Destructor", tamaño: 4 },
+      { nombre: "Fragata", tamaño: 3 },
+      { nombre: "Crucero", tamaño: 3 },
+      { nombre: "Corbeta", tamaño: 3 },
+      { nombre: "Buque de Asalto", tamaño: 2 },
+      { nombre: "Lancha Torpedera", tamaño: 2 },
+      { nombre: "Barco de Suministros", tamaño: 2 },
+      { nombre: "Submarino Ligero", tamaño: 2 },
+      { nombre: "Buque Hospital", tamaño: 1 },
+      { nombre: "Barco Radar", tamaño: 1 }
+    ];
+    const TAMANIO = 12;
+    let tableroJugador = [], tableroIA = [];
+    let barcosJugador = [], barcosIA = [];
+    let misiles = ["normal", "explosivo", "inteligente"];
+    let misilSeleccionado = "normal";
+    let juegoActivo = true;
+    let turnoJugador = true;
+    let estadoBarcosJugador = [], estadoBarcosIA = [];
+    // --- Sonidos ---
+    function snd(id) { try { document.getElementById(id).currentTime = 0; document.getElementById(id).play(); } catch(e){} }
+    // --- Utilidades ---
+    function crearMatriz(vacio=0) { return Array(TAMANIO).fill(0).map(()=>Array(TAMANIO).fill(vacio)); }
+    function clonar(obj) { return JSON.parse(JSON.stringify(obj)); }
+    function celdaId(x, y) { return `${x}-${y}`; }
+    // --- Animación de agua ---
+    function animarAgua(tableroId) {
+      let celdas = document.querySelectorAll(`#${tableroId} .celda.agua`);
+      celdas.forEach(celda => {
+        celda.style.animationDelay = `${Math.random()}s`;
+      });
+    }
+    // --- Mostrar nombres de barcos restantes ---
+    function actualizarNombresBarcos(lista, estado, elementoId) {
+      let txt = '';
+      lista.forEach((b,i) => {
+        let hundido = estado[i].restantes === 0;
+        txt += `<span style="color:${hundido?'#e63946':'#1976d2'};font-weight:${hundido?'bold':'normal'};">${b.nombre}</span>${i<lista.length-1?", ":""}`;
+      });
+      document.getElementById(elementoId).innerHTML = txt;
+    }
+    // --- Pintar los tableros ---
+    function dibujarTablero(tablero, barcos, estadoBarcos, id, esIA) {
+      let cont = document.getElementById(id);
+      cont.innerHTML = '';
+      for(let x=0;x<TAMANIO;x++) for(let y=0;y<TAMANIO;y++) {
+        let cel = document.createElement('div');
+        cel.className = 'celda agua';
+        if(tablero[x][y].barco !== null) {
+          if(tablero[x][y].tocado && tablero[x][y].hundido)
+            cel.className = 'celda hundido';
+          else if(tablero[x][y].tocado)
+            cel.className = 'celda tocado';
+          else if(!esIA)
+            cel.className = 'celda barco';
+        } else if(tablero[x][y].tocado) {
+          cel.className = 'celda agua tocado';
+        }
+        cel.dataset.x = x;
+        cel.dataset.y = y;
+        cont.appendChild(cel);
+      }
+      animarAgua(id);
+    }
+    // --- Colocar barcos automáticamente (simple, para demo) ---
+    function colocarBarcos(tablero, barcos) {
+      let matriz = crearMatriz();
+      let listaBarcos = [];
+      for(let b=0; b<barcos.length; b++) {
+        let colocado = false, intentos=0;
+        while(!colocado && intentos<100) {
+          let dir = Math.random()<0.5?'H':'V';
+          let x = Math.floor(Math.random() * (dir==='H'?TAMANIO-barcos[b].tamaño+1:TAMANIO));
+          let y = Math.floor(Math.random() * (dir==='V'?TAMANIO-barcos[b].tamaño+1:TAMANIO));
+          let puede = true;
+          for(let i=0;i<barcos[b].tamaño;i++) {
+            let xi = x+(dir==='H'?i:0), yi = y+(dir==='V'?i:0);
+            if(matriz[xi][yi]!==0) { puede=false; break;}
+          }
+          if(puede) {
+            let coords = [];
+            for(let i=0;i<barcos[b].tamaño;i++) {
+              let xi = x+(dir==='H'?i:0), yi = y+(dir==='V'?i:0);
+              matriz[xi][yi] = b+1;
+              coords.push({x:xi, y:yi, tocado:false});
+            }
+            listaBarcos.push({ ...barcos[b], coords });
+            colocado = true;
+          }
+          intentos++;
+        }
+      }
+      // Construye el tablero final
+      let tableroFinal = crearMatriz().map((fila,x)=>fila.map((v,y)=>({barco:null,tocado:false,hundido:false})));
+      listaBarcos.forEach((barco, idx)=>{
+        barco.coords.forEach(c=>{ tableroFinal[c.x][c.y].barco = idx; });
+      });
+      return { tablero: tableroFinal, barcos: listaBarcos };
+    }
+    // --- Inicializa el juego ---
+    function reiniciarJuego() {
+      // Jugador y IA
+      let resJ = colocarBarcos(clonar(tableroJugador), BARCOS);
+      let resIA = colocarBarcos(clonar(tableroIA), BARCOS);
+      tableroJugador = resJ.tablero; barcosJugador = resJ.barcos;
+      tableroIA = resIA.tablero; barcosIA = resIA.barcos;
+      estadoBarcosJugador = barcosJugador.map(b=>({restantes:b.tamaño}));
+      estadoBarcosIA = barcosIA.map(b=>({restantes:b.tamaño}));
+      turnoJugador = true; juegoActivo = true;
+      dibujarTablero(tableroJugador, barcosJugador, estadoBarcosJugador, 'tablero-jugador', false);
+      dibujarTablero(tableroIA, barcosIA, estadoBarcosIA, 'tablero-ia', true);
+      actualizarNombresBarcos(BARCOS, estadoBarcosJugador, "barcos-jugador");
+      actualizarNombresBarcos(BARCOS, estadoBarcosIA, "barcos-ia");
+    }
+    // --- Misiles ---
+    function aplicarMisil(tablero, x, y, tipo, barcos, estadoBarcos, esIA) {
+      let efectos = [];
+      if(tipo==="normal") { efectos.push([x,y]); }
+      if(tipo==="explosivo") {
+        for(let dx=-1;dx<=1;dx++) for(let dy=-1;dy<=1;dy++) {
+          let nx=x+dx, ny=y+dy;
+          if(nx>=0 && ny>=0 && nx<TAMANIO && ny<TAMANIO) efectos.push([nx,ny]);
+        }
+      }
+      if(tipo==="inteligente") {
+        // Busca la celda más cercana a un barco no tocado
+        let mejores = [];
+        for(let bx=0; bx<TAMANIO; bx++) for(let by=0; by<TAMANIO; by++) {
+          if(tablero[bx][by].barco!==null && !tablero[bx][by].tocado)
+            mejores.push([bx,by]);
+        }
+        if(mejores.length>0) {
+          let [ax,ay] = mejores[Math.floor(Math.random()*mejores.length)];
+          efectos.push([ax,ay]);
+        } else {
+          efectos.push([x,y]);
+        }
+      }
+      efectos.forEach(([nx,ny])=>{
+        if(tablero[nx][ny].tocado) return;
+        tablero[nx][ny].tocado = true;
+        if(tablero[nx][ny].barco!==null) {
+          // Tocado un barco
+          let idBarco = tablero[nx][ny].barco;
+          estadoBarcos[idBarco].restantes--;
+          snd('snd-tocado');
+          // ¿Hundido?
+          if(estadoBarcos[idBarco].restantes===0) {
+            barcos[idBarco].coords.forEach(c=>{
+              tablero[c.x][c.y].hundido=true;
+            });
+            snd('snd-hundido');
+          }
+        } else {
+          snd('snd-agua');
+        }
+      });
+    }
+    // --- Verifica si todos los barcos han sido hundidos ---
+    function checarVictoria(estadoBarcos) {
+      return estadoBarcos.every(b=>b.restantes===0);
+    }
+    // --- Turno del jugador ---
+    document.getElementById('tablero-ia').onclick = function(ev) {
+      if(!juegoActivo || !turnoJugador) return;
+      let cel = ev.target.closest('.celda');
+      if(!cel) return;
+      let x = parseInt(cel.dataset.x), y = parseInt(cel.dataset.y);
+      if(tableroIA[x][y].tocado) return;
+      turnoJugador = false;
+      document.getElementById('tablero-ia').style.pointerEvents = "none";
+      cel.classList.add('anim-misil'+(misiles.indexOf(misilSeleccionado)+1));
+      snd('snd-misil');
+      setTimeout(()=>{
+        aplicarMisil(tableroIA, x, y, misilSeleccionado, barcosIA, estadoBarcosIA, true);
+        dibujarTablero(tableroIA, barcosIA, estadoBarcosIA, 'tablero-ia', true);
+        actualizarNombresBarcos(BARCOS, estadoBarcosIA, "barcos-ia");
+        if(checarVictoria(estadoBarcosIA)) {
+          juegoActivo = false;
+          alert("¡Ganaste! Todos los barcos enemigos han sido hundidos.");
+          return;
+        }
+        setTimeout(turnoIA, 900);
+      }, 550);
+    };
+    // --- IA avanzada (búsqueda inteligente) ---
+    function turnoIA() {
+      if(!juegoActivo) return;
+      // IA: Si tocó un barco, sigue buscando cerca
+      let posibles = [];
+      for(let x=0;x<TAMANIO;x++) for(let y=0;y<TAMANIO;y++) {
+        if(tableroJugador[x][y].barco!==null && tableroJugador[x][y].tocado && !tableroJugador[x][y].hundido) {
+          // Busca alrededor
+          for(let dx=-1;dx<=1;dx++) for(let dy=-1;dy<=1;dy++) {
+            let nx=x+dx, ny=y+dy;
+            if(nx>=0 && ny>=0 && nx<TAMANIO && ny<TAMANIO && !tableroJugador[nx][ny].tocado)
+              posibles.push([nx,ny]);
+          }
+        }
+      }
+      if(posibles.length===0) {
+        // Si no hay tocados, busca al azar
+        for(let x=0;x<TAMANIO;x++) for(let y=0;y<TAMANIO;y++)
+          if(!tableroJugador[x][y].tocado) posibles.push([x,y]);
+      }
+      let [x,y] = posibles[Math.floor(Math.random()*posibles.length)];
+      let tipo = ["normal","explosivo","inteligente"][Math.floor(Math.random()*3)];
+      let cel = document.querySelector(`#tablero-jugador .celda[data-x="${x}"][data-y="${y}"]`);
+      if(cel) cel.classList.add("anim-misil"+(misiles.indexOf(tipo)+1));
+      snd('snd-misil');
+      setTimeout(()=>{
+        aplicarMisil(tableroJugador, x, y, tipo, barcosJugador, estadoBarcosJugador, false);
+        dibujarTablero(tableroJugador, barcosJugador, estadoBarcosJugador, 'tablero-jugador', false);
+        actualizarNombresBarcos(BARCOS, estadoBarcosJugador, "barcos-jugador");
+        if(checarVictoria(estadoBarcosJugador)) {
+          juegoActivo = false;
+          alert("¡La IA ha ganado! Todos tus barcos fueron hundidos.");
+          return;
+        }
+        turnoJugador = true;
+        document.getElementById('tablero-ia').style.pointerEvents = "";
+      }, 900);
+    }
+    // --- Misiles (selección) ---
+    misiles.forEach((m,i)=>{
+      document.getElementById('misil'+(i+1)).onclick = function(){
+        misilSeleccionado = m;
+        misiles.forEach((_m,j)=>{
+          document.getElementById('misil'+(j+1)).style.border = (i===j) ? "3px solid #222" : "none";
+        });
+      }
+    });
+    // --- Reiniciar ---
+    document.getElementById('reiniciar').onclick = reiniciarJuego;
+    // --- Inicializa ---
+    reiniciarJuego();
+  </script>
+</body>
+</html>
